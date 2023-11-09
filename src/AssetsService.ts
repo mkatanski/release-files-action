@@ -60,6 +60,7 @@ export class AssetsService {
     }
 
     const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/')
+    console.log(`Owner: ${owner}, Repo: ${repo}`)
     this.repoData = { owner, repo }
   }
 
@@ -87,6 +88,7 @@ export class AssetsService {
   }
 
   async getReleaseAssets(release_id: number) {
+    console.log(`Getting assets for release ${release_id}`)
     const result = await this.octokit.request(
       'GET /repos/{owner}/{repo}/releases/{release_id}/assets',
       {
@@ -100,6 +102,7 @@ export class AssetsService {
   }
 
   async deleteAsset(asset_id: number) {
+    console.log(`Deleting asset ${asset_id}`)
     await this.octokit.request(
       'DELETE /repos/{owner}/{repo}/releases/assets/{asset_id}',
       {
@@ -118,6 +121,7 @@ export class AssetsService {
     name?: string,
     label?: string
   ) {
+    console.log(`Uploading asset ${name}`)
     const fileRes = await this.octokit.request(
       'POST /repos/{owner}/{repo}/releases/{release_id}/assets{?name,label}',
       {

@@ -29940,6 +29940,7 @@ class AssetsService {
             throw new Error('GITHUB_REPOSITORY not set');
         }
         const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
+        console.log(`Owner: ${owner}, Repo: ${repo}`);
         this.repoData = { owner, repo };
     }
     async getRelease() {
@@ -29958,6 +29959,7 @@ class AssetsService {
         return release;
     }
     async getReleaseAssets(release_id) {
+        console.log(`Getting assets for release ${release_id}`);
         const result = await this.octokit.request('GET /repos/{owner}/{repo}/releases/{release_id}/assets', {
             ...this.repoData,
             release_id: release_id,
@@ -29966,6 +29968,7 @@ class AssetsService {
         return result.data;
     }
     async deleteAsset(asset_id) {
+        console.log(`Deleting asset ${asset_id}`);
         await this.octokit.request('DELETE /repos/{owner}/{repo}/releases/assets/{asset_id}', {
             ...this.repoData,
             asset_id,
@@ -29973,6 +29976,7 @@ class AssetsService {
         });
     }
     async uploadAsset(release_id, data, contentType, contentLength, name, label) {
+        console.log(`Uploading asset ${name}`);
         const fileRes = await this.octokit.request('POST /repos/{owner}/{repo}/releases/{release_id}/assets{?name,label}', {
             ...this.repoData,
             release_id: release_id,
