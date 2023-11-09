@@ -9,6 +9,8 @@ jobs:
     runs-on: ubuntu-latest
     name: Test job which uses the action
     steps:
+      - uses: actions/checkout@v4
+
       - name: Create artifact from dist folder
         run: zip -r release-files-dist-${{ github.ref_name }}.zip dist
 
