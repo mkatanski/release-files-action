@@ -5,9 +5,9 @@ on:
     types: [published]
 
 jobs:
-  hello_world_job:
+  test-job:
     runs-on: ubuntu-latest
-    name: A job to say hello
+    name: Test job which uses the action
     steps:
       - name: Create artifact from dist folder
         run: zip -r release-files-dist-${{ github.ref_name }}.zip dist
