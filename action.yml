@@ -1,23 +1,45 @@
-name: 'The name of your action here'
-description: 'Provide a description here'
-author: 'Your name or organization here'
+name: 'Release Files Action'
+description: 'Upload or download assets from given github release'
+author: 'Michał Katański'
 
-# Add your action's branding here. This will appear on the GitHub Marketplace.
 branding:
-  icon: 'heart'
-  color: 'red'
+  icon: 'archive'
+  color: 'orange'
 
-# Define your inputs here.
 inputs:
-  milliseconds:
-    description: 'Your input description here'
+  token:
+    description: 'GitHub token'
     required: true
-    default: '1000'
 
-# Define your outputs here.
+  release-tag:
+    description: 'Tag releated to release'
+    required: true
+
+  file:
+    description: 'File to upload'
+    required: true
+
+  name:
+    description: 'Asset name'
+    required: true
+
+  label:
+    description: 'Asset label'
+    required: false
+
+  content-type:
+    description: 'File content type'
+    default: 'application/zip'
+
 outputs:
-  time:
-    description: 'Your output description here'
+  download-url:
+    description: 'Download URL of uploaded asset'
+  id:
+    description: 'ID of uploaded asset'
+  label:
+    description: 'Label of uploaded asset'
+  name:
+    description: 'Name of uploaded asset'
 
 runs:
   using: node20
