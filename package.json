@@ -1,0 +1,93 @@
+{
+  "name": "release-files-action",
+  "description": "GitHub Action for uploading and download files from release assets",
+  "version": "0.0.1",
+  "author": "Michał Katański",
+  "private": true,
+  "homepage": "https://github.com/mkatanski/release-files-action",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mkatanski/release-files-action.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mkatanski/release-files-action/issues"
+  },
+  "keywords": [
+    "actions",
+    "node",
+    "release",
+    "files",
+    "assets",
+    "download",
+    "upload"
+  ],
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "bundle": "yarn format:write && yarn package",
+    "ci-test": "jest",
+    "coverage": "make-coverage-badge --output-path ./badges/coverage.svg",
+    "format:write": "prettier --write **/*.ts",
+    "format:check": "prettier --check **/*.ts",
+    "lint": "npx eslint . -c ./.github/linters/.eslintrc.yml",
+    "package": "ncc build src/index.ts --license licenses.txt",
+    "package:watch": "yarn package -- --watch",
+    "test": "jest",
+    "all": "yarn format:write && yarn lint && yarn test && yarn coverage && yarn package"
+  },
+  "license": "MIT",
+  "jest": {
+    "preset": "ts-jest",
+    "verbose": true,
+    "clearMocks": true,
+    "testEnvironment": "node",
+    "moduleFileExtensions": [
+      "js",
+      "ts"
+    ],
+    "testMatch": [
+      "**/*.test.ts"
+    ],
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "/dist/"
+    ],
+    "transform": {
+      "^.+\\.ts$": "ts-jest"
+    },
+    "coverageReporters": [
+      "json-summary",
+      "text",
+      "lcov"
+    ],
+    "collectCoverage": true,
+    "collectCoverageFrom": [
+      "./src/**"
+    ]
+  },
+  "dependencies": {
+    "@actions/core": "^1.10.1"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.8",
+    "@types/node": "^20.9.0",
+    "@typescript-eslint/eslint-plugin": "^6.10.0",
+    "@typescript-eslint/parser": "^6.10.0",
+    "@vercel/ncc": "^0.38.1",
+    "eslint": "^8.53.0",
+    "eslint-plugin-github": "^4.10.1",
+    "eslint-plugin-jest": "^27.6.0",
+    "eslint-plugin-jsonc": "^2.10.0",
+    "eslint-plugin-prettier": "^5.0.1",
+    "jest": "^29.7.0",
+    "js-yaml": "^4.1.0",
+    "prettier": "^3.0.3",
+    "prettier-eslint": "^16.1.2",
+    "ts-jest": "^29.1.1",
+    "typescript": "^5.2.2"
+  }
+}
