@@ -29975,14 +29975,10 @@ class AssetsService {
             headers: HEADERS_BASE
         });
     }
-    async uploadAsset(release_id, data, contentType, contentLength, name, label) {
-        console.log(`Uploading asset ${name}`);
-        const fileRes = await this.octokit.request('POST /repos/{owner}/{repo}/releases/{release_id}/assets{?name,label}', {
-            ...this.repoData,
-            release_id: release_id,
+    async uploadAsset(data, contentType, contentLength, upload_url) {
+        console.log(`Uploading asset ${upload_url}`);
+        const fileRes = await this.octokit.request(`POST ${upload_url}`, {
             data,
-            name,
-            label,
             headers: {
                 ...HEADERS_BASE,
                 'content-type': contentType,
@@ -30053,7 +30049,8 @@ async function run() {
         });
         const fileStream = fs_1.default.createReadStream(file);
         const contentLength = fs_1.default.statSync(file).size;
-        const fileRes = await assetsService.uploadAsset(release.id, fileStream, contentType, contentLength, name, label);
+        const upload_url = release.upload_url.replace('{?name,label}', `?name=${name}&label=${label}`);
+        const fileRes = await assetsService.uploadAsset(fileStream, contentType, contentLength, upload_url);
         console.log(`Download URL: ${fileRes.browser_download_url}`);
         core.setOutput('download-url', fileRes.browser_download_url);
         core.setOutput('id', fileRes.id);

@@ -114,29 +114,20 @@ export class AssetsService {
   }
 
   async uploadAsset(
-    release_id: number,
     data: fs.ReadStream,
     contentType: string,
     contentLength: number,
-    name?: string,
-    label?: string
+    upload_url: string
   ) {
-    console.log(`Uploading asset ${name}`)
-    const fileRes = await this.octokit.request(
-      'POST /repos/{owner}/{repo}/releases/{release_id}/assets{?name,label}',
-      {
-        ...this.repoData,
-        release_id: release_id,
-        data,
-        name,
-        label,
-        headers: {
-          ...HEADERS_BASE,
-          'content-type': contentType,
-          'content-length': contentLength
-        }
+    console.log(`Uploading asset ${upload_url}`)
+    const fileRes = await this.octokit.request(`POST ${upload_url}`, {
+      data,
+      headers: {
+        ...HEADERS_BASE,
+        'content-type': contentType,
+        'content-length': contentLength
       }
-    )
+    })
 
     return fileRes.data as Asset
   }

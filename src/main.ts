@@ -27,13 +27,16 @@ async function run() {
     const fileStream = fs.createReadStream(file)
     const contentLength = fs.statSync(file).size
 
+    const upload_url = release.upload_url.replace(
+      '{?name,label}',
+      `?name=${name}&label=${label}`
+    )
+
     const fileRes = await assetsService.uploadAsset(
-      release.id,
       fileStream,
       contentType,
       contentLength,
-      name,
-      label
+      upload_url
     )
 
     console.log(`Download URL: ${fileRes.browser_download_url}`)
