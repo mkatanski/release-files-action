@@ -29978,22 +29978,45 @@ exports.AssetsService = AssetsService;
 
 "use strict";
 
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const core_1 = __importDefault(__nccwpck_require__(2186));
+const core = __importStar(__nccwpck_require__(2186));
 const fs_1 = __importDefault(__nccwpck_require__(7147));
 const types_1 = __nccwpck_require__(9830);
 const AssetsService_1 = __nccwpck_require__(7283);
 async function run() {
     try {
-        const token = core_1.default.getInput('token', { required: true });
-        const releaseTag = core_1.default.getInput('release-tag', { required: true });
-        const file = core_1.default.getInput('file', { required: true });
-        const name = core_1.default.getInput('name', { required: true });
-        const label = core_1.default.getInput('label', { required: false });
-        const contentType = core_1.default.getInput('content-type', { required: true });
+        const token = core.getInput('token', { required: true });
+        const releaseTag = core.getInput('release-tag', { required: true });
+        const file = core.getInput('file', { required: true });
+        const name = core.getInput('name', { required: true });
+        const label = core.getInput('label', { required: false });
+        const contentType = core.getInput('content-type', { required: true });
         const assetsService = new AssetsService_1.AssetsService(token, releaseTag);
         const release = await assetsService.getRelease();
         const assets = await assetsService.getReleaseAssets(release.id);
@@ -30008,14 +30031,14 @@ async function run() {
         const contentLength = fs_1.default.statSync(file).size;
         const fileRes = await assetsService.uploadAsset(release.id, fileStream, contentType, contentLength, name, label);
         console.log(`Download URL: ${fileRes.browser_download_url}`);
-        core_1.default.setOutput('download-url', fileRes.browser_download_url);
-        core_1.default.setOutput('id', fileRes.id);
-        core_1.default.setOutput('label', fileRes.label);
-        core_1.default.setOutput('name', fileRes.name);
+        core.setOutput('download-url', fileRes.browser_download_url);
+        core.setOutput('id', fileRes.id);
+        core.setOutput('label', fileRes.label);
+        core.setOutput('name', fileRes.name);
     }
     catch (e) {
         const message = (0, types_1.isNativeError)(e) ? e.message : 'Unknown error';
-        core_1.default.setFailed(message);
+        core.setFailed(message);
     }
 }
 run();
