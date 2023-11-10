@@ -39,6 +39,12 @@ jobs:
           name: release-files-dist-${{ github.ref_name }}.zip
           mode: download
 
+      - name: Upload zip as artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: downloaded-${{ github.ref_name }}.zip
+          path: downloaded-${{ github.ref_name }}.zip
+
       - name: List files
         run: ls -lh
 
