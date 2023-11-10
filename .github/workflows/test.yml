@@ -36,7 +36,7 @@ jobs:
         id: download-assets
         uses: mkatanski/release-files-action@v1.0.0
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PAT_TOKEN }}
           release-tag: ${{ github.ref_name }}
           file-path: downloaded-${{ github.ref_name }}.zip
           name: release-files-dist-${{ github.ref_name }}.zip
