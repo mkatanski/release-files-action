@@ -1,8 +1,8 @@
 import * as core from '@actions/core'
 import fs from 'fs'
 import { AssetsService } from './AssetsService'
-import https from 'https'
 import { Runner } from './commonTypes'
+import axios from 'axios'
 
 export const downloadFile: Runner = async ({
   filePath,
@@ -28,44 +28,32 @@ export const downloadFile: Runner = async ({
   const download_url = asset.url
 
   core.debug('Create write stream to: ' + filePath)
-  const file = fs.createWriteStream(filePath)
-
-  const headers = {
-    Accept: 'application/octet-stream',
-    'User-Agent': 'request module'
-  }
-
-  const downloadRequest = (): Promise<void> => {
-    return new Promise((resolve, reject) => {
-      file.on('finish', () => {
-        core.debug('File downloaded successfully.')
-        resolve()
-      })
-
-      file.on('error', err => {
-        core.debug('There was an issue downloading file.')
-        core.setFailed('Error downloading file:' + err.message)
-        reject('Error downloading file:' + err.message)
-      })
-
-      https.get(
-        {
-          headers,
-          href: download_url
-        },
-        function (response) {
-          core.debug('Downloading file...')
-          core.debug('Response status code: ' + response.statusCode)
-          core.debug(
-            'Response headers: ' + JSON.stringify(response.headers, null, 2)
-          )
-
-          response.pipe(file)
-        }
-      )
-    })
-  }
+  const fileWriter = fs.createWriteStream(filePath)
 
   core.debug('Downloading file from: ' + download_url)
-  await downloadRequest()
+  await axios({
+    url: download_url,
+    method: 'GET',
+    responseType: 'stream' // important
+  }).then(response => {
+    return new Promise((resolve, reject) => {
+      response.data.pipe(fileWriter)
+      let error: Error | null = null
+
+      fileWriter.on('error', err => {
+        error = err
+        core.debug('Error writing to file: ' + filePath)
+        core.debug(err.message)
+        fileWriter.close()
+        reject(err)
+      })
+
+      fileWriter.on('close', () => {
+        if (!error) {
+          core.debug('File downloaded successfully.')
+          resolve(true)
+        }
+      })
+    })
+  })
 }
