@@ -34058,7 +34058,8 @@ async function downloadGithubAsset(dl) {
         method: 'GET',
         headers: {
             Accept: 'application/octet-stream',
-            Authorization: `token ${token}`,
+            Authorization: `Bearer ${token}`,
+            'X-GitHub-Api-Version': '2022-11-28',
             'User-Agent': ''
         }
     }), (0, fs_1.createWriteStream)(dl.toLocalFile));
