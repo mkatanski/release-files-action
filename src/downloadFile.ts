@@ -28,7 +28,7 @@ export const downloadFile: Runner = async ({
 
   const {
     body,
-    headers: { accept },
+    headers: { accept, 'user-agent': userAgent },
     method,
     url
   } = assetsService.getReleaseAssetEndpoint(asset.id)
@@ -37,13 +37,16 @@ export const downloadFile: Runner = async ({
     throw new Error('GITHUB_REPOSITORY not set')
   }
 
-  const [owner] = process.env.GITHUB_REPOSITORY.split('/')
+  const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/')
 
-  const headers: HeadersInit = {
+  let headers: HeadersInit = {
     accept: accept || 'application/octet-stream',
     authorization: `token ${token}`,
-    'User-Agent': owner
+    'user-agent': repo
   }
+
+  if (typeof userAgent !== 'undefined')
+    headers = { ...headers, 'user-agent': userAgent }
 
   const response = await fetch(url, { body, headers, method })
   if (!response.ok) {
