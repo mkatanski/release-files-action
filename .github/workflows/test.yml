@@ -27,6 +27,8 @@ jobs:
     name: Download release assets
     needs: upload-release-assets
     steps:
+      - uses: actions/checkout@v4
+
       - name: Download release assets
         id: download-assets
         uses: ./
