@@ -46,7 +46,7 @@ jobs:
         uses: i3h/download-release-asset@v1
         with:
           owner: i3h
-          repo: test
+          repo: release-files-action
           tag: ${{ github.ref_name }}
           file: release-files-dist-${{ github.ref_name }}.zip
           path: ./
