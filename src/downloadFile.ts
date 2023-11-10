@@ -37,12 +37,12 @@ export const downloadFile: Runner = async ({
     throw new Error('GITHUB_REPOSITORY not set')
   }
 
-  const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/')
+  const [owner] = process.env.GITHUB_REPOSITORY.split('/')
 
-  let headers: HeadersInit = {
+  const headers: HeadersInit = {
     accept: accept || 'application/octet-stream',
     authorization: `token ${token}`,
-    'user-agent': owner
+    'User-Agent': owner
   }
 
   const response = await fetch(url, { body, headers, method })
