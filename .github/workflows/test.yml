@@ -37,7 +37,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           release-tag: ${{ github.ref_name }}
-          file-path: release-files-dist-${{ github.ref_name }}.zip
+          file-path: ./
           name: release-files-dist-${{ github.ref_name }}.zip
           mode: download
 
