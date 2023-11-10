@@ -29,7 +29,11 @@ export const downloadFile: Runner = async ({
 
   const download_url = asset.url
 
-  const file = fs.createWriteStream('file.jpg')
+  const file = fs.createWriteStream(filePath)
+  file.on('finish', () => {
+    file.close()
+    console.log('Download Completed')
+  })
 
   const headers = {
     Accept: 'application/octet-stream',
@@ -43,12 +47,6 @@ export const downloadFile: Runner = async ({
     },
     function (response) {
       response.pipe(file)
-
-      // after download completed close filestream
-      file.on('finish', () => {
-        file.close()
-        console.log('Download Completed')
-      })
     }
   )
 }

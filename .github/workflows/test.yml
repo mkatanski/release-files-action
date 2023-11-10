@@ -39,8 +39,8 @@ jobs:
           name: release-files-dist-${{ github.ref_name }}.zip
           mode: download
 
+      - name: List files
+        run: ls
+
       - name: Unzip downloaded file to test folder
         run: unzip downloaded-${{ github.ref_name }}.zip -d test
-
-      - name: List files
-        run: ls -la
