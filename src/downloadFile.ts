@@ -2,8 +2,7 @@ import * as core from '@actions/core'
 import fs from 'fs'
 import { AssetsService } from './AssetsService'
 import { Runner } from './commonTypes'
-import { mkdir, writeFile } from 'fs/promises'
-import { dirname } from 'path'
+import { downloadGithubAsset } from './downloadGithubAsset'
 
 export const downloadFile: Runner = async ({
   filePath,
@@ -26,42 +25,17 @@ export const downloadFile: Runner = async ({
     return
   }
 
-  const {
-    body,
-    headers: { accept, 'user-agent': userAgent },
-    method,
-    url
-  } = assetsService.getReleaseAssetEndpoint(asset.id)
-
   if (!process.env.GITHUB_REPOSITORY) {
     throw new Error('GITHUB_REPOSITORY not set')
   }
 
   const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/')
 
-  let headers: HeadersInit = {
-    accept: accept || 'application/octet-stream',
-    authorization: `token ${token}`,
-    'user-agent': repo
-  }
-
-  if (typeof userAgent !== 'undefined')
-    headers = { ...headers, 'user-agent': userAgent }
-
-  core.info('headers:' + JSON.stringify(headers))
-  core.info('url:' + url)
-  core.info('method: ' + method)
-  core.info('body: ' + JSON.stringify(body))
-
-  const response = await fetch(url, { body, headers, method })
-  if (!response.ok) {
-    const text = await response.text()
-    core.warning(text)
-    throw new Error('Invalid response')
-  }
-  const blob = await response.blob()
-  const arrayBuffer = await blob.arrayBuffer()
-
-  await mkdir(dirname(filePath), { recursive: true })
-  void (await writeFile(filePath, new Uint8Array(arrayBuffer)))
+  downloadGithubAsset({
+    owner,
+    repo,
+    assetId: asset.id,
+    toLocalFile: filePath,
+    githubToken: token
+  })
 }
