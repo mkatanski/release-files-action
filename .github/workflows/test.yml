@@ -31,26 +31,26 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # - name: Download release assets
-      #   id: download-assets
-      #   uses: mkatanski/release-files-action@v1.0.0
-      #   with:
-      #     token: ${{ secrets.PAT_TOKEN }}
-      #     release-tag: ${{ github.ref_name }}
-      #     file-path: downloaded-${{ github.ref_name }}.zip
-      #     name: release-files-dist-${{ github.ref_name }}.zip
-      #     mode: download
-
-      - name: Download Release Asset
-        id: download_release_asset
-        uses: i3h/download-release-asset@v1
+      - name: Download release assets
+        id: download-assets
+        uses: mkatanski/release-files-action@v1.0.0
         with:
-          owner: mkatanski
-          repo: release-files-action
-          tag: ${{ github.ref_name }}
-          file: release-files-dist-${{ github.ref_name }}.zip
-          path: ./
           token: ${{ secrets.GITHUB_TOKEN }}
+          release-tag: ${{ github.ref_name }}
+          file-path: release-files-dist-${{ github.ref_name }}.zip
+          name: release-files-dist-${{ github.ref_name }}.zip
+          mode: download
+
+      # - name: Download Release Asset
+      #   id: download_release_asset
+      #   uses: i3h/download-release-asset@v1
+      #   with:
+      #     owner: mkatanski
+      #     repo: release-files-action
+      #     tag: ${{ github.ref_name }}
+      #     file: release-files-dist-${{ github.ref_name }}.zip
+      #     path: ./
+      #     token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload zip as artifact
         uses: actions/upload-artifact@v2

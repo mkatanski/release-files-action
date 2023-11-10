@@ -1,8 +1,8 @@
 import * as core from '@actions/core'
 import { isNativeError } from 'util/types'
 import { Config, Runner } from './commonTypes'
-import { uploadFile } from './uploadFile'
-import { downloadFile } from './downloadFile'
+import { uploadFile } from './uploadFileRunner'
+import { downloadFile } from './downloadFileRunner'
 
 const getFileName = () => {
   if (!core.getInput('name', { required: false })) {

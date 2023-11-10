@@ -2,7 +2,7 @@ import * as core from '@actions/core'
 import fs from 'fs'
 import { AssetsService } from './AssetsService'
 import { Runner } from './commonTypes'
-import { downloadGithubAsset } from './downloadGithubAsset'
+import { downloadReleaseAsset } from './downloadReleaseAsset'
 
 export const downloadFile: Runner = async ({
   filePath,
@@ -31,11 +31,12 @@ export const downloadFile: Runner = async ({
 
   const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/')
 
-  downloadGithubAsset({
+  await downloadReleaseAsset({
     owner,
     repo,
-    assetId: asset.id,
-    toLocalFile: filePath,
-    githubToken: token
+    tag: releaseTag,
+    file: name,
+    filePath,
+    token
   })
 }
