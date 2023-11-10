@@ -27,6 +27,7 @@ export const downloadFile: Runner = async ({
 
   const download_url = asset.url
 
+  core.debug('Create write stream to: ' + filePath)
   const file = fs.createWriteStream(filePath)
 
   const headers = {
