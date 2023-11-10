@@ -59,7 +59,7 @@ jobs:
 
       - name: Upload created artifact to release assets
         id: upload-assets
-        uses: ./
+        uses: mkatanski/release-files-action@v1.0.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           release-tag: ${{ github.ref_name }}
@@ -74,7 +74,7 @@ jobs:
 
       - name: Download release assets
         id: download-assets
-        uses: ./
+        uses: mkatanski/release-files-action@v1.0.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           release-tag: ${{ github.ref_name }}
