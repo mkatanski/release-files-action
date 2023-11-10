@@ -72,7 +72,7 @@ export async function downloadReleaseAsset({
         headers: headers,
         responseType: 'stream'
       }).then(resp => {
-        resp.data.pipe(fs.createWriteStream(filePath))
+        resp.data.pipe(fs.createWriteStream(`${filePath}/${a.name}`))
       })
     )
   )

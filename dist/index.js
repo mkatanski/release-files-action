@@ -33559,19 +33559,10 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.downloadFile = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const fs_1 = __importDefault(__nccwpck_require__(7147));
-const AssetsService_1 = __nccwpck_require__(7283);
 const downloadReleaseAsset_1 = __nccwpck_require__(8411);
 const downloadFile = async ({ filePath, name, releaseTag, token }) => {
-    if (fs_1.default.existsSync(filePath)) {
-        core.setFailed(`File found at path: ${filePath}. Cannot overwrite.`);
-        return;
-    }
-    const assetsService = new AssetsService_1.AssetsService(token, releaseTag);
-    const release = await assetsService.getRelease();
-    const assets = await assetsService.getReleaseAssets(release.id);
-    const asset = assets.find(({ name: asset_name }) => asset_name == name);
-    if (!asset) {
-        core.setFailed(`Asset ${name} not found`);
+    if (fs_1.default.existsSync(`${filePath}/${name}`)) {
+        core.setFailed(`File found at path: ${filePath}/${name}. Cannot overwrite.`);
         return;
     }
     if (!process.env.GITHUB_REPOSITORY) {
@@ -33649,7 +33640,7 @@ async function downloadReleaseAsset({ owner, repo, tag, file, token, filePath })
         headers: headers,
         responseType: 'stream'
     }).then(resp => {
-        resp.data.pipe(fs_1.default.createWriteStream(filePath));
+        resp.data.pipe(fs_1.default.createWriteStream(`${filePath}/${a.name}`));
     })));
 }
 exports.downloadReleaseAsset = downloadReleaseAsset;

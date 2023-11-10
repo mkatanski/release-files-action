@@ -1,6 +1,5 @@
 import * as core from '@actions/core'
 import fs from 'fs'
-import { AssetsService } from './AssetsService'
 import { Runner } from './commonTypes'
 import { downloadReleaseAsset } from './downloadReleaseAsset'
 
@@ -10,18 +9,8 @@ export const downloadFile: Runner = async ({
   releaseTag,
   token
 }) => {
-  if (fs.existsSync(filePath)) {
-    core.setFailed(`File found at path: ${filePath}. Cannot overwrite.`)
-    return
-  }
-
-  const assetsService = new AssetsService(token, releaseTag)
-  const release = await assetsService.getRelease()
-  const assets = await assetsService.getReleaseAssets(release.id)
-  const asset = assets.find(({ name: asset_name }) => asset_name == name)
-
-  if (!asset) {
-    core.setFailed(`Asset ${name} not found`)
+  if (fs.existsSync(`${filePath}/${name}`)) {
+    core.setFailed(`File found at path: ${filePath}/${name}. Cannot overwrite.`)
     return
   }
 
