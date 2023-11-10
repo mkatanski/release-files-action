@@ -36,24 +36,31 @@ export const downloadFile: Runner = async ({
     'User-Agent': 'request module'
   }
 
-  https.get(
-    {
-      headers,
-      href: download_url
-    },
-    function (response) {
-      console.log('Downloading file...')
-      console.log('Response status code: ' + response.statusCode)
-      console.log(
-        'Response headers: ' + JSON.stringify(response.headers, null, 2)
+  const downloadRequest = (): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      https.get(
+        {
+          headers,
+          href: download_url
+        },
+        function (response) {
+          console.log('Downloading file...')
+          console.log('Response status code: ' + response.statusCode)
+          console.log(
+            'Response headers: ' + JSON.stringify(response.headers, null, 2)
+          )
+
+          response.pipe(file)
+
+          response.on('end', () => {
+            file.close()
+            console.log('Download Completed')
+            resolve()
+          })
+        }
       )
+    })
+  }
 
-      response.pipe(file)
-
-      response.on('end', () => {
-        file.close()
-        console.log('Download Completed')
-      })
-    }
-  )
+  await downloadRequest()
 }
