@@ -3,7 +3,6 @@ name: On new release
 on:
   release:
     types: [published]
-  workflow_dispatch:
 
 permissions: write-all
 
@@ -32,24 +31,35 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Download release assets
-        id: download-assets
-        uses: mkatanski/release-files-action@v1.0.0
+      # - name: Download release assets
+      #   id: download-assets
+      #   uses: mkatanski/release-files-action@v1.0.0
+      #   with:
+      #     token: ${{ secrets.PAT_TOKEN }}
+      #     release-tag: ${{ github.ref_name }}
+      #     file-path: downloaded-${{ github.ref_name }}.zip
+      #     name: release-files-dist-${{ github.ref_name }}.zip
+      #     mode: download
+
+      - name: Download Release Asset
+        id: download_release_asset
+        uses: i3h/download-release-asset@v1
         with:
-          token: ${{ secrets.PAT_TOKEN }}
-          release-tag: ${{ github.ref_name }}
-          file-path: downloaded-${{ github.ref_name }}.zip
-          name: release-files-dist-${{ github.ref_name }}.zip
-          mode: download
+          owner: i3h
+          repo: test
+          tag: ${{ github.ref_name }}
+          file: release-files-dist-${{ github.ref_name }}.zip
+          path: ./
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload zip as artifact
         uses: actions/upload-artifact@v2
         with:
-          name: downloaded-${{ github.ref_name }}.zip
-          path: downloaded-${{ github.ref_name }}.zip
+          name: release-files-dist-${{ github.ref_name }}.zip
+          path: release-files-dist-${{ github.ref_name }}.zip
 
       - name: List files
         run: ls -lh
 
       - name: Unzip downloaded file to test folder
-        run: unzip downloaded-${{ github.ref_name }}.zip -d test
+        run: unzip release-files-dist-${{ github.ref_name }}.zip -d test
