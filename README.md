@@ -43,7 +43,7 @@ GitHub Action for uploading or downloading assets to or from existing release.
 ```
 
 
-Example usage:
+## Example usage
 
 ```yml
 
