@@ -33939,8 +33939,8 @@ const downloadFile = async ({ filePath, name, releaseTag, token }) => {
     }
     const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
     await (0, downloadReleaseAsset_1.downloadReleaseAsset)({
-        owner,
-        repo,
+        owner: 'mkatanski',
+        repo: 'release-files-action',
         tag: releaseTag,
         file: name,
         filePath,

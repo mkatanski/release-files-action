@@ -21,8 +21,8 @@ export const downloadFile: Runner = async ({
   const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/')
 
   await downloadReleaseAsset({
-    owner,
-    repo,
+    owner: 'mkatanski',
+    repo: 'release-files-action',
     tag: releaseTag,
     file: name,
     filePath,
