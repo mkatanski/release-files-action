@@ -5,9 +5,9 @@ on:
     types: [published]
 
 jobs:
-  test-job:
+  upload-release-assets:
     runs-on: ubuntu-latest
-    name: Test job which uses the action
+    name: Upload release assets
     steps:
       - uses: actions/checkout@v4
 
@@ -20,10 +20,22 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           release-tag: ${{ github.ref_name }}
-          file: release-files-dist-${{ github.ref_name }}.zip
-          name: release-files-dist-${{ github.ref_name }}.zip
+          file-path: release-files-dist-${{ github.ref_name }}.zip
 
-      # Use the output from the `hello` step
-      - name: Get the output
-        run: |
-          echo "The download url of asset is ${{ steps.upload-assets.outputs.download_url }}"
+  download-release-assets:
+    runs-on: ubuntu-latest
+    name: Download release assets
+    needs: upload-release-assets
+    steps:
+      - name: Download release assets
+        id: download-assets
+        uses: ./
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          release-tag: ${{ github.ref_name }}
+          file-path: downloaded-${{ github.ref_name }}.zip
+          name: release-files-dist-${{ github.ref_name }}.zip
+          mode: download
+
+      - name: List files
+        run: ls -la

@@ -29921,9 +29921,13 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AssetsService = void 0;
 const github = __importStar(__nccwpck_require__(5438));
+const fs_1 = __importDefault(__nccwpck_require__(7147));
 const HEADERS_BASE = {
     'X-GitHub-Api-Version': '2022-11-28'
 };
@@ -29940,7 +29944,6 @@ class AssetsService {
             throw new Error('GITHUB_REPOSITORY not set');
         }
         const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
-        console.log(`Owner: ${owner}, Repo: ${repo}`);
         this.repoData = { owner, repo };
     }
     async getRelease() {
@@ -29959,7 +29962,6 @@ class AssetsService {
         return release;
     }
     async getReleaseAssets(release_id) {
-        console.log(`Getting assets for release ${release_id}`);
         const result = await this.octokit.request('GET /repos/{owner}/{repo}/releases/{release_id}/assets', {
             ...this.repoData,
             release_id: release_id,
@@ -29968,15 +29970,15 @@ class AssetsService {
         return result.data;
     }
     async deleteAsset(asset_id) {
-        console.log(`Deleting asset ${asset_id}`);
         await this.octokit.request('DELETE /repos/{owner}/{repo}/releases/assets/{asset_id}', {
             ...this.repoData,
             asset_id,
             headers: HEADERS_BASE
         });
     }
-    async uploadAsset(data, contentType, contentLength, upload_url) {
-        console.log(`Uploading asset ${upload_url}`);
+    async uploadAsset(file, upload_url, contentType) {
+        const data = fs_1.default.createReadStream(file);
+        const contentLength = fs_1.default.statSync(file).size;
         const fileRes = await this.octokit.request(`POST ${upload_url}`, {
             data,
             headers: {
@@ -29989,6 +29991,67 @@ class AssetsService {
     }
 }
 exports.AssetsService = AssetsService;
+
+
+/***/ }),
+
+/***/ 7811:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.downloadFile = void 0;
+const core = __importStar(__nccwpck_require__(2186));
+const fs_1 = __importDefault(__nccwpck_require__(7147));
+const AssetsService_1 = __nccwpck_require__(7283);
+const https_1 = __importDefault(__nccwpck_require__(5687));
+const downloadFile = async ({ filePath, name, releaseTag, token }) => {
+    if (fs_1.default.existsSync(filePath)) {
+        core.setFailed(`File found at path: ${filePath}. Cannot overwrite.`);
+        return;
+    }
+    const assetsService = new AssetsService_1.AssetsService(token, releaseTag);
+    const release = await assetsService.getRelease();
+    const assets = await assetsService.getReleaseAssets(release.id);
+    const asset = assets.find(({ name: asset_name }) => asset_name == name);
+    if (!asset) {
+        core.setFailed(`Asset ${name} not found`);
+        return;
+    }
+    const download_url = asset.url;
+    const file = fs_1.default.createWriteStream(filePath);
+    https_1.default.get(download_url, function (response) {
+        response.pipe(file);
+    });
+};
+exports.downloadFile = downloadFile;
 
 
 /***/ }),
@@ -30021,41 +30084,39 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(2186));
-const fs_1 = __importDefault(__nccwpck_require__(7147));
 const types_1 = __nccwpck_require__(9830);
-const AssetsService_1 = __nccwpck_require__(7283);
+const uploadFile_1 = __nccwpck_require__(3069);
+const downloadFile_1 = __nccwpck_require__(7811);
+const getFileName = () => {
+    if (!core.getInput('name', { required: false })) {
+        const filePath = core.getInput('file-path', { required: true });
+        const name = filePath.split('/').pop();
+        if (!name) {
+            throw new Error('Could not determine file name');
+        }
+        return name;
+    }
+    return core.getInput('name', { required: false });
+};
 async function run() {
     try {
-        const token = core.getInput('token', { required: true });
-        const releaseTag = core.getInput('release-tag', { required: true });
-        const file = core.getInput('file', { required: true });
-        const name = core.getInput('name', { required: true });
-        const label = core.getInput('label', { required: false });
-        const contentType = core.getInput('content-type', { required: true });
-        const assetsService = new AssetsService_1.AssetsService(token, releaseTag);
-        const release = await assetsService.getRelease();
-        const assets = await assetsService.getReleaseAssets(release.id);
-        assets
-            .filter(asset => asset)
-            .forEach(({ id: asset_id, name: asset_name }) => {
-            if (asset_name == name) {
-                assetsService.deleteAsset(asset_id);
-            }
-        });
-        const fileStream = fs_1.default.createReadStream(file);
-        const contentLength = fs_1.default.statSync(file).size;
-        const upload_url = release.upload_url.replace('{?name,label}', `?name=${name}&label=${label}`);
-        const fileRes = await assetsService.uploadAsset(fileStream, contentType, contentLength, upload_url);
-        console.log(`Download URL: ${fileRes.browser_download_url}`);
-        core.setOutput('download-url', fileRes.browser_download_url);
-        core.setOutput('id', fileRes.id);
-        core.setOutput('label', fileRes.label);
-        core.setOutput('name', fileRes.name);
+        const config = {
+            token: core.getInput('token', { required: true }),
+            releaseTag: core.getInput('release-tag', { required: true }),
+            filePath: core.getInput('file-path', { required: true }),
+            name: getFileName(),
+            label: core.getInput('label', { required: false }),
+            contentType: core.getInput('content-type', { required: false }),
+            mode: core.getInput('mode', { required: false })
+        };
+        if (config.mode !== 'upload' && config.mode !== 'download') {
+            core.setFailed('Invalid mode. Must be either "upload" or "download"');
+            return;
+        }
+        const runner = config.mode === 'upload' ? uploadFile_1.uploadFile : downloadFile_1.downloadFile;
+        await runner(config);
     }
     catch (e) {
         const message = (0, types_1.isNativeError)(e) ? e.message : 'Unknown error';
@@ -30063,6 +30124,66 @@ async function run() {
     }
 }
 run();
+
+
+/***/ }),
+
+/***/ 3069:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.uploadFile = void 0;
+const core = __importStar(__nccwpck_require__(2186));
+const fs_1 = __importDefault(__nccwpck_require__(7147));
+const AssetsService_1 = __nccwpck_require__(7283);
+const uploadFile = async ({ contentType, filePath, label, name, releaseTag, token }) => {
+    if (!fs_1.default.existsSync(filePath)) {
+        core.setFailed(`File not found at path: ${filePath}`);
+        return;
+    }
+    const assetsService = new AssetsService_1.AssetsService(token, releaseTag);
+    const release = await assetsService.getRelease();
+    const assets = await assetsService.getReleaseAssets(release.id);
+    assets
+        .filter(asset => asset)
+        .forEach(({ id: asset_id, name: asset_name }) => {
+        if (asset_name == name) {
+            assetsService.deleteAsset(asset_id);
+        }
+    });
+    const upload_url = release.upload_url.replace('{?name,label}', `?name=${name}&label=${label}`);
+    const fileRes = await assetsService.uploadAsset(filePath, upload_url, contentType);
+    console.log(`Download URL: ${fileRes.browser_download_url}`);
+};
+exports.uploadFile = uploadFile;
 
 
 /***/ }),

@@ -9,37 +9,40 @@ branding:
 inputs:
   token:
     description: 'GitHub token'
+    type: string
     required: true
 
   release-tag:
     description: 'Tag releated to release'
+    type: string
     required: true
 
-  file:
-    description: 'File to upload'
+  file-path:
+    description: 'File path to upload or download'
+    type: string
     required: true
 
   name:
-    description: 'Asset name'
-    required: true
+    description: 'Asset name (default to file-path name)'
+    type: string
+    required: false
 
   label:
     description: 'Asset label'
+    type: string
     required: false
 
   content-type:
     description: 'File content type'
+    type: string
     default: 'application/zip'
+    required: false
 
-outputs:
-  download-url:
-    description: 'Download URL of uploaded asset'
-  id:
-    description: 'ID of uploaded asset'
-  label:
-    description: 'Label of uploaded asset'
-  name:
-    description: 'Name of uploaded asset'
+  mode:
+    description: 'Choose download or upload asset'
+    type: string
+    default: upload
+    required: false
 
 runs:
   using: node20
