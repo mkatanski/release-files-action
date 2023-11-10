@@ -4,6 +4,8 @@ on:
   release:
     types: [published]
 
+permissions: write-all
+
 jobs:
   upload-release-assets:
     runs-on: ubuntu-latest

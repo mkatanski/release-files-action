@@ -37,7 +37,8 @@
     "package": "ncc build src/main.ts --license licenses.txt",
     "package:watch": "yarn package -- --watch",
     "test": "jest",
-    "all": "yarn format:write && yarn lint && yarn test && yarn coverage && yarn package"
+    "all": "yarn format:write && yarn lint && yarn test && yarn coverage && yarn package",
+    "locally": "node -r dotenv/config ./dist/index.js"
   },
   "license": "MIT",
   "jest": {
@@ -71,8 +72,7 @@
   },
   "dependencies": {
     "@actions/core": "^1.10.1",
-    "@actions/github": "^6.0.0",
-    "axios": "^1.6.1"
+    "@actions/github": "^6.0.0"
   },
   "devDependencies": {
     "@types/jest": "^29.5.8",
@@ -80,6 +80,7 @@
     "@typescript-eslint/eslint-plugin": "^6.10.0",
     "@typescript-eslint/parser": "^6.10.0",
     "@vercel/ncc": "^0.38.1",
+    "dotenv": "^16.3.1",
     "eslint": "^8.53.0",
     "eslint-plugin-github": "^4.10.1",
     "eslint-plugin-jest": "^27.6.0",
