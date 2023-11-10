@@ -45,7 +45,7 @@ jobs:
         id: download_release_asset
         uses: i3h/download-release-asset@v1
         with:
-          owner: i3h
+          owner: mkatanski
           repo: release-files-action
           tag: ${{ github.ref_name }}
           file: release-files-dist-${{ github.ref_name }}.zip
