@@ -2,7 +2,8 @@ import * as core from '@actions/core'
 import fs from 'fs'
 import { AssetsService } from './AssetsService'
 import { Runner } from './commonTypes'
-import axios from 'axios'
+import { mkdir, writeFile } from 'fs/promises'
+import { dirname } from 'path'
 
 export const downloadFile: Runner = async ({
   filePath,
@@ -25,35 +26,30 @@ export const downloadFile: Runner = async ({
     return
   }
 
-  const download_url = asset.url
+  const {
+    body,
+    headers: { accept, 'user-agent': userAgent },
+    method,
+    url
+  } = assetsService.getReleaseAssetEndpoint(asset.id)
 
-  core.debug('Create write stream to: ' + filePath)
-  const fileWriter = fs.createWriteStream(filePath)
+  let headers: HeadersInit = {
+    accept: accept || 'application/octet-stream',
+    authorization: `token ${token}`
+  }
 
-  core.debug('Downloading file from: ' + download_url)
-  await axios({
-    url: download_url,
-    method: 'GET',
-    responseType: 'stream' // important
-  }).then(response => {
-    return new Promise((resolve, reject) => {
-      response.data.pipe(fileWriter)
-      let error: Error | null = null
+  if (typeof userAgent !== 'undefined')
+    headers = { ...headers, 'user-agent': userAgent }
 
-      fileWriter.on('error', err => {
-        error = err
-        core.debug('Error writing to file: ' + filePath)
-        core.debug(err.message)
-        fileWriter.close()
-        reject(err)
-      })
+  const response = await fetch(url, { body, headers, method })
+  if (!response.ok) {
+    const text = await response.text()
+    core.warning(text)
+    throw new Error('Invalid response')
+  }
+  const blob = await response.blob()
+  const arrayBuffer = await blob.arrayBuffer()
 
-      fileWriter.on('close', () => {
-        if (!error) {
-          core.debug('File downloaded successfully.')
-          resolve(true)
-        }
-      })
-    })
-  })
+  await mkdir(dirname(filePath), { recursive: true })
+  void (await writeFile(filePath, new Uint8Array(arrayBuffer)))
 }
