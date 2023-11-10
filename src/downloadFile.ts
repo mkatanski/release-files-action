@@ -48,10 +48,10 @@ export const downloadFile: Runner = async ({
   if (typeof userAgent !== 'undefined')
     headers = { ...headers, 'user-agent': userAgent }
 
-  console.log('headers', headers)
-  console.log('url', url)
-  console.log('method', method)
-  console.log('body', body)
+  core.info('headers:' + JSON.stringify(headers))
+  core.info('url:' + url)
+  core.info('method: ' + method)
+  core.info('body: ' + JSON.stringify(body))
 
   const response = await fetch(url, { body, headers, method })
   if (!response.ok) {
