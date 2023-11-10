@@ -1,7 +1,7 @@
 {
   "name": "release-files-action",
   "description": "GitHub Action for uploading and download files from release assets",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "author": "Michał Katański",
   "private": true,
   "homepage": "https://github.com/mkatanski/release-files-action",
