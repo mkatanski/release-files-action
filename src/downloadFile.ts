@@ -17,9 +17,7 @@ export const downloadFile: Runner = async ({
 
   const assetsService = new AssetsService(token, releaseTag)
   const release = await assetsService.getRelease()
-
   const assets = await assetsService.getReleaseAssets(release.id)
-
   const asset = assets.find(({ name: asset_name }) => asset_name == name)
 
   if (!asset) {
@@ -38,29 +36,35 @@ export const downloadFile: Runner = async ({
 
   const downloadRequest = (): Promise<void> => {
     return new Promise((resolve, reject) => {
+      file.on('finish', () => {
+        core.debug('File downloaded successfully.')
+        resolve()
+      })
+
+      file.on('error', err => {
+        core.debug('There was an issue downloading file.')
+        core.setFailed('Error downloading file:' + err.message)
+        reject('Error downloading file:' + err.message)
+      })
+
       https.get(
         {
           headers,
           href: download_url
         },
         function (response) {
-          console.log('Downloading file...')
-          console.log('Response status code: ' + response.statusCode)
-          console.log(
+          core.debug('Downloading file...')
+          core.debug('Response status code: ' + response.statusCode)
+          core.debug(
             'Response headers: ' + JSON.stringify(response.headers, null, 2)
           )
 
           response.pipe(file)
-
-          response.on('end', () => {
-            file.close()
-            console.log('Download Completed')
-            resolve()
-          })
         }
       )
     })
   }
 
+  core.debug('Downloading file from: ' + download_url)
   await downloadRequest()
 }
