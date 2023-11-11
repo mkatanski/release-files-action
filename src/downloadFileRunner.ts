@@ -1,7 +1,14 @@
 import * as core from '@actions/core'
 import fs from 'fs'
+import axios from 'axios'
+import axiosRetry from 'axios-retry'
 import { Runner } from './commonTypes'
-import { downloadReleaseAsset } from './downloadReleaseAsset'
+import { AssetsService } from './AssetsService'
+
+axiosRetry(axios, {
+  retries: 3,
+  retryDelay: axiosRetry.exponentialDelay
+})
 
 export const downloadFile: Runner = async ({
   filePath,
@@ -14,18 +21,28 @@ export const downloadFile: Runner = async ({
     return
   }
 
-  if (!process.env.GITHUB_REPOSITORY) {
-    throw new Error('GITHUB_REPOSITORY not set')
+  const assetsService = new AssetsService(token, releaseTag)
+  const release = await assetsService.getRelease()
+  const assets = await assetsService.getReleaseAssets(release.id)
+
+  const asset = assets.find(a => a.name === name)
+
+  if (!asset) {
+    core.setFailed(`File not found in release ${releaseTag}: ${name}`)
+    return
   }
 
-  const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/')
+  const headers = {
+    Accept: 'application/octet-stream',
+    Authorization: 'token ' + token
+  }
 
-  await downloadReleaseAsset({
-    owner: 'mkatanski',
-    repo: 'release-files-action',
-    tag: releaseTag,
-    file: name,
-    filePath,
-    token
+  await axios({
+    method: 'get',
+    url: asset.url,
+    headers: headers,
+    responseType: 'stream'
+  }).then(resp => {
+    resp.data.pipe(fs.createWriteStream(filePath))
   })
 }

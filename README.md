@@ -20,7 +20,7 @@ GitHub Action for uploading or downloading assets to or from existing release.
     required: true
 
   name:
-    description: 'Asset name (default to file-path name)'
+    description: 'Asset name (default to file-path name). In download mode must be the name of release asset.'
     type: string
     required: false
 
@@ -59,7 +59,7 @@ jobs:
 
       - name: Upload created artifact to release assets
         id: upload-assets
-        uses: mkatanski/release-files-action@v1.0.0
+        uses: mkatanski/release-files-action@v1.0.1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           release-tag: ${{ github.ref_name }}
@@ -74,7 +74,7 @@ jobs:
 
       - name: Download release assets
         id: download-assets
-        uses: mkatanski/release-files-action@v1.0.0
+        uses: mkatanski/release-files-action@v1.0.1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           release-tag: ${{ github.ref_name }}

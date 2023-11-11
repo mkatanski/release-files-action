@@ -99,22 +99,6 @@ export class AssetsService {
     return result.data as Asset[]
   }
 
-  getReleaseAssetEndpoint(asset_id: number) {
-    const result = this.octokit.request.endpoint(
-      'GET /repos/:owner/:repo/releases/assets/:asset_id',
-      {
-        ...this.repoData,
-        asset_id,
-        headers: {
-          ...HEADERS_BASE,
-          Accept: 'application/octet-stream'
-        }
-      }
-    )
-
-    return result
-  }
-
   async deleteAsset(asset_id: number) {
     await this.octokit.request(
       'DELETE /repos/{owner}/{repo}/releases/assets/{asset_id}',

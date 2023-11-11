@@ -33856,17 +33856,6 @@ class AssetsService {
         });
         return result.data;
     }
-    getReleaseAssetEndpoint(asset_id) {
-        const result = this.octokit.request.endpoint('GET /repos/:owner/:repo/releases/assets/:asset_id', {
-            ...this.repoData,
-            asset_id,
-            headers: {
-                ...HEADERS_BASE,
-                Accept: 'application/octet-stream'
-            }
-        });
-        return result;
-    }
     async deleteAsset(asset_id) {
         await this.octokit.request('DELETE /repos/{owner}/{repo}/releases/assets/{asset_id}', {
             ...this.repoData,
@@ -33928,91 +33917,40 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.downloadFile = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const fs_1 = __importDefault(__nccwpck_require__(7147));
-const downloadReleaseAsset_1 = __nccwpck_require__(8411);
+const axios_1 = __importDefault(__nccwpck_require__(6545));
+const axios_retry_1 = __importDefault(__nccwpck_require__(9179));
+const AssetsService_1 = __nccwpck_require__(7283);
+(0, axios_retry_1.default)(axios_1.default, {
+    retries: 3,
+    retryDelay: axios_retry_1.default.exponentialDelay
+});
 const downloadFile = async ({ filePath, name, releaseTag, token }) => {
     if (fs_1.default.existsSync(`${filePath}/${name}`)) {
         core.setFailed(`File found at path: ${filePath}/${name}. Cannot overwrite.`);
         return;
     }
-    if (!process.env.GITHUB_REPOSITORY) {
-        throw new Error('GITHUB_REPOSITORY not set');
+    const assetsService = new AssetsService_1.AssetsService(token, releaseTag);
+    const release = await assetsService.getRelease();
+    const assets = await assetsService.getReleaseAssets(release.id);
+    const asset = assets.find(a => a.name === name);
+    if (!asset) {
+        core.setFailed(`File not found in release ${releaseTag}: ${name}`);
+        return;
     }
-    const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
-    await (0, downloadReleaseAsset_1.downloadReleaseAsset)({
-        owner: 'mkatanski',
-        repo: 'release-files-action',
-        tag: releaseTag,
-        file: name,
-        filePath,
-        token
-    });
-};
-exports.downloadFile = downloadFile;
-
-
-/***/ }),
-
-/***/ 8411:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.downloadReleaseAsset = void 0;
-const fs_1 = __importDefault(__nccwpck_require__(7147));
-const axios_1 = __importDefault(__nccwpck_require__(6545));
-const axios_retry_1 = __importDefault(__nccwpck_require__(9179));
-(0, axios_retry_1.default)(axios_1.default, {
-    retries: 3,
-    retryDelay: axios_retry_1.default.exponentialDelay
-});
-async function downloadReleaseAsset({ owner, repo, tag, file, token, filePath }) {
-    const api = 'https://api.github.com';
-    // Get release
-    const url = `${api}/repos/${owner}/${repo}/releases/tags/${tag}`;
-    let headers = {
-        Accept: 'application/json',
-        Authorization: 'token ' + token
-    };
-    let resp = await (0, axios_1.default)({
-        method: 'get',
-        url,
-        headers: headers
-    });
-    const assetsData = resp.data;
-    // Construct regex
-    let re;
-    if (file[0] == '/' && file[file.length - 1] == '/') {
-        re = new RegExp(file.substr(1, file.length - 2));
-    }
-    else {
-        re = new RegExp('^' + file + '$');
-    }
-    // Get assets
-    let assets = [];
-    for (let a of assetsData.assets) {
-        if (re.test(a.name)) {
-            assets.push(a);
-        }
-    }
-    // Download assets
-    headers = {
+    const headers = {
         Accept: 'application/octet-stream',
         Authorization: 'token ' + token
     };
-    await Promise.all(assets.map(a => (0, axios_1.default)({
+    await (0, axios_1.default)({
         method: 'get',
-        url: a.url,
+        url: asset.url,
         headers: headers,
         responseType: 'stream'
     }).then(resp => {
-        resp.data.pipe(fs_1.default.createWriteStream(`${filePath}/${a.name}`));
-    })));
-}
-exports.downloadReleaseAsset = downloadReleaseAsset;
+        resp.data.pipe(fs_1.default.createWriteStream(filePath));
+    });
+};
+exports.downloadFile = downloadFile;
 
 
 /***/ }),
