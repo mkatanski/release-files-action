@@ -37,15 +37,15 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           release-tag: ${{ github.ref_name }}
-          file-path: ./
+          file-path: dist-${{ github.ref_name }}.zip
           name: release-files-dist-${{ github.ref_name }}.zip
           mode: download
 
       - name: Upload zip as artifact
         uses: actions/upload-artifact@v2
         with:
-          name: release-files-dist-${{ github.ref_name }}.zip
-          path: release-files-dist-${{ github.ref_name }}.zip
+          name: dist-${{ github.ref_name }}.zip
+          path: dist-${{ github.ref_name }}.zip
 
       - name: List files
         run: ls -lh
