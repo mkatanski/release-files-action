@@ -6,6 +6,7 @@ export type Config = {
   label: string
   contentType: string
   mode: string
+  notFoundBehavior: 'error' | 'output'
 }
 
 export type Runner = (config: Config) => Promise<void>

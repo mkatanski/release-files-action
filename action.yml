@@ -44,6 +44,16 @@ inputs:
     default: upload
     required: false
 
+  not-found-behaviour:
+    description: "Choose if action should fail or set output when asset is not found"
+    type: string
+    default: error
+    required: false
+
+outputs:
+  file-not-found:
+    description: ""
+
 runs:
   using: node16
   main: dist/index.js

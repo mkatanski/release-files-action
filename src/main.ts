@@ -28,11 +28,24 @@ async function run() {
       name: getFileName(),
       label: core.getInput('label', { required: false }),
       contentType: core.getInput('content-type', { required: false }),
-      mode: core.getInput('mode', { required: false })
+      mode: core.getInput('mode', { required: false }),
+      notFoundBehavior: core.getInput('not-found-behavior', {
+        required: false
+      }) as Config['notFoundBehavior']
     }
 
     if (config.mode !== 'upload' && config.mode !== 'download') {
       core.setFailed('Invalid mode. Must be either "upload" or "download"')
+      return
+    }
+
+    if (
+      config.notFoundBehavior !== 'error' &&
+      config.notFoundBehavior !== 'output'
+    ) {
+      core.setFailed(
+        'Invalid not-found-behavior. Must be either "error" or "output"'
+      )
       return
     }
 

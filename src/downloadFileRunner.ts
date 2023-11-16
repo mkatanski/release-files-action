@@ -14,7 +14,8 @@ export const downloadFile: Runner = async ({
   filePath,
   name,
   releaseTag,
-  token
+  token,
+  notFoundBehavior
 }) => {
   if (fs.existsSync(`${filePath}/${name}`)) {
     core.setFailed(`File found at path: ${filePath}/${name}. Cannot overwrite.`)
@@ -28,6 +29,11 @@ export const downloadFile: Runner = async ({
   const asset = assets.find(a => a.name === name)
 
   if (!asset) {
+    if (notFoundBehavior === 'output') {
+      core.setOutput('file-not-found', 'true')
+      return
+    }
+
     core.setFailed(`File not found in release ${releaseTag}: ${name}`)
     return
   }

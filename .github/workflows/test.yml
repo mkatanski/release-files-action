@@ -7,6 +7,27 @@ on:
 permissions: write-all
 
 jobs:
+  download-invalid-asset:
+    runs-on: ubuntu-latest
+    name: Download invalid asset
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download release assets
+        id: download-assets
+        uses: ./
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          release-tag: ${{ github.ref_name }}
+          file-path: invalid_asset.zip
+          name: release-files-dist-${{ github.ref_name }}.zip
+          mode: download
+          not-found-behaviour: output
+
+      - name: Check output
+        if: steps.download-assets.outputs.not-found != 'true'
+        run: exit 1
+
   upload-release-assets:
     runs-on: ubuntu-latest
     name: Upload release assets
