@@ -33924,7 +33924,7 @@ const AssetsService_1 = __nccwpck_require__(7283);
     retries: 3,
     retryDelay: axios_retry_1.default.exponentialDelay
 });
-const downloadFile = async ({ filePath, name, releaseTag, token }) => {
+const downloadFile = async ({ filePath, name, releaseTag, token, notFoundBehavior }) => {
     if (fs_1.default.existsSync(`${filePath}/${name}`)) {
         core.setFailed(`File found at path: ${filePath}/${name}. Cannot overwrite.`);
         return;
@@ -33934,6 +33934,10 @@ const downloadFile = async ({ filePath, name, releaseTag, token }) => {
     const assets = await assetsService.getReleaseAssets(release.id);
     const asset = assets.find(a => a.name === name);
     if (!asset) {
+        if (notFoundBehavior === 'output') {
+            core.setOutput('file-not-found', 'true');
+            return;
+        }
         core.setFailed(`File not found in release ${releaseTag}: ${name}`);
         return;
     }
@@ -34008,10 +34012,18 @@ async function run() {
             name: getFileName(),
             label: core.getInput('label', { required: false }),
             contentType: core.getInput('content-type', { required: false }),
-            mode: core.getInput('mode', { required: false })
+            mode: core.getInput('mode', { required: false }),
+            notFoundBehavior: core.getInput('not-found-behavior', {
+                required: false
+            })
         };
         if (config.mode !== 'upload' && config.mode !== 'download') {
             core.setFailed('Invalid mode. Must be either "upload" or "download"');
+            return;
+        }
+        if (config.notFoundBehavior !== 'error' &&
+            config.notFoundBehavior !== 'output') {
+            core.setFailed('Invalid not-found-behavior. Must be either "error" or "output"');
             return;
         }
         const runner = config.mode === 'upload' ? uploadFileRunner_1.uploadFile : downloadFileRunner_1.downloadFile;
