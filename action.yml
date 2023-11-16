@@ -44,7 +44,7 @@ inputs:
     default: upload
     required: false
 
-  not-found-behaviour:
+  not-found-behavior:
     description: "Choose if action should fail or set output when asset is not found"
     type: string
     default: error
