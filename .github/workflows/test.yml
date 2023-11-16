@@ -22,7 +22,7 @@ jobs:
           file-path: invalid_asset.zip
           name: release-files-dist-${{ github.ref_name }}.zip
           mode: download
-          not-found-behaviour: output
+          not-found-behavior: output
 
       - name: Check output
         if: steps.download-assets.outputs.not-found != 'true'
