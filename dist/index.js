@@ -33917,6 +33917,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.downloadFile = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const fs_1 = __importDefault(__nccwpck_require__(7147));
+const os_1 = __importDefault(__nccwpck_require__(2037));
 const axios_1 = __importDefault(__nccwpck_require__(6545));
 const axios_retry_1 = __importDefault(__nccwpck_require__(9179));
 const AssetsService_1 = __nccwpck_require__(7283);
@@ -33924,6 +33925,14 @@ const AssetsService_1 = __nccwpck_require__(7283);
     retries: 3,
     retryDelay: axios_retry_1.default.exponentialDelay
 });
+function setOutput(key, value) {
+    // Temporary hack until core actions library catches up with github new recommendations
+    const output = process.env['GITHUB_OUTPUT'];
+    if (!output) {
+        throw new Error('GITHUB_OUTPUT environment variable is not set');
+    }
+    fs_1.default.appendFileSync(output, `${key}=${value}${os_1.default.EOL}`);
+}
 const downloadFile = async ({ filePath, name, releaseTag, token, notFoundBehavior }) => {
     if (fs_1.default.existsSync(`${filePath}/${name}`)) {
         core.setFailed(`File found at path: ${filePath}/${name}. Cannot overwrite.`);
@@ -33935,7 +33944,7 @@ const downloadFile = async ({ filePath, name, releaseTag, token, notFoundBehavio
     const asset = assets.find(a => a.name === name);
     if (!asset) {
         if (notFoundBehavior === 'output') {
-            core.setOutput('file-not-found', 'true');
+            setOutput('file-not-found', 'true');
             return;
         }
         core.setFailed(`File not found in release ${releaseTag}: ${name}`);

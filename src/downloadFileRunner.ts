@@ -1,5 +1,6 @@
 import * as core from '@actions/core'
 import fs from 'fs'
+import os from 'os'
 import axios from 'axios'
 import axiosRetry from 'axios-retry'
 import { Runner } from './commonTypes'
@@ -9,6 +10,17 @@ axiosRetry(axios, {
   retries: 3,
   retryDelay: axiosRetry.exponentialDelay
 })
+
+function setOutput(key: string, value: string) {
+  // Temporary hack until core actions library catches up with github new recommendations
+  const output = process.env['GITHUB_OUTPUT']
+
+  if (!output) {
+    throw new Error('GITHUB_OUTPUT environment variable is not set')
+  }
+
+  fs.appendFileSync(output, `${key}=${value}${os.EOL}`)
+}
 
 export const downloadFile: Runner = async ({
   filePath,
@@ -30,7 +42,7 @@ export const downloadFile: Runner = async ({
 
   if (!asset) {
     if (notFoundBehavior === 'output') {
-      core.setOutput('file-not-found', 'true')
+      setOutput('file-not-found', 'true')
       return
     }
 
