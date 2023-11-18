@@ -50,6 +50,11 @@ export const downloadFile: Runner = async ({
     return
   }
 
+  if (notFoundBehavior === 'output') {
+    setOutput('file-not-found', 'false')
+    return
+  }
+
   const headers = {
     Accept: 'application/octet-stream',
     Authorization: 'token ' + token
