@@ -52,7 +52,6 @@ export const downloadFile: Runner = async ({
 
   if (notFoundBehavior === 'output') {
     setOutput('file-not-found', 'false')
-    return
   }
 
   const headers = {
