@@ -33950,10 +33950,6 @@ const downloadFile = async ({ filePath, name, releaseTag, token, notFoundBehavio
         core.setFailed(`File not found in release ${releaseTag}: ${name}`);
         return;
     }
-    if (notFoundBehavior === 'output') {
-        setOutput('file-not-found', 'false');
-        return;
-    }
     const headers = {
         Accept: 'application/octet-stream',
         Authorization: 'token ' + token
@@ -33966,6 +33962,9 @@ const downloadFile = async ({ filePath, name, releaseTag, token, notFoundBehavio
     }).then(resp => {
         resp.data.pipe(fs_1.default.createWriteStream(filePath));
     });
+    if (notFoundBehavior === 'output') {
+        setOutput('file-not-found', 'false');
+    }
 };
 exports.downloadFile = downloadFile;
 
