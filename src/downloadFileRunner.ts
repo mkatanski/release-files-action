@@ -50,10 +50,6 @@ export const downloadFile: Runner = async ({
     return
   }
 
-  if (notFoundBehavior === 'output') {
-    setOutput('file-not-found', 'false')
-  }
-
   const headers = {
     Accept: 'application/octet-stream',
     Authorization: 'token ' + token
@@ -67,4 +63,8 @@ export const downloadFile: Runner = async ({
   }).then(resp => {
     resp.data.pipe(fs.createWriteStream(filePath))
   })
+
+  if (notFoundBehavior === 'output') {
+    setOutput('file-not-found', 'false')
+  }
 }
