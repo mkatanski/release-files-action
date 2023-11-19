@@ -20,7 +20,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           release-tag: ${{ github.ref_name }}
           file-path: invalid_asset.zip
-          name: release-files-dist-${{ github.ref_name }}.zip
+          name: invalid_asset.zip
           mode: download
           not-found-behavior: output
 
